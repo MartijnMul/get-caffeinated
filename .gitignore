@@ -3,3 +3,8 @@ build/
 .swiftpm/
 .DS_Store
 *.xcodeproj/xcuserdata/
+
+# Local project docs, not versioned
+CLAUDE.md
+CHANGELOG.md
+docs/
