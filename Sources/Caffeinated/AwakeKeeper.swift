@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import IOKit.pwr_mgt
 
 /// Keeps the display (and therefore the system) awake, like `caffeinate -d`,
@@ -10,6 +10,18 @@ final class AwakeKeeper: ObservableObject {
 
     private var assertionID: IOPMAssertionID = 0
     private var timer: Timer?
+    private var wakeObserver: NSObjectProtocol?
+
+    init() {
+        // The Mac can still sleep while we hold the assertion (lid closed, Apple
+        // menu > Sleep), and a Timer fires late after that. On wake, measure the
+        // time left against the clock again.
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.scheduleTimer() }
+        }
+    }
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
     func start(for duration: TimeInterval?) {
@@ -26,9 +38,7 @@ final class AwakeKeeper: ObservableObject {
 
         if let duration {
             activeUntil = Date().addingTimeInterval(duration)
-            timer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
-                MainActor.assumeIsolated { self?.stop() }
-            }
+            scheduleTimer()
         }
     }
 
@@ -39,6 +49,20 @@ final class AwakeKeeper: ObservableObject {
         if isActive {
             IOPMAssertionRelease(assertionID)
             isActive = false
+        }
+    }
+
+    /// Sets the timer to fire at `activeUntil`, or stops right away if that
+    /// moment has already passed.
+    private func scheduleTimer() {
+        timer?.invalidate()
+        timer = nil
+        guard let activeUntil else { return }
+
+        let remaining = activeUntil.timeIntervalSinceNow
+        guard remaining > 0 else { return stop() }
+        timer = Timer.scheduledTimer(withTimeInterval: remaining, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.stop() }
         }
     }
 }
