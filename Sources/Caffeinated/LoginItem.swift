@@ -1,0 +1,29 @@
+import ServiceManagement
+
+/// Starts Caffeinated at login, through `SMAppService`. The state lives in
+/// macOS, not in our settings, because people can also switch it off in
+/// System Settings > General > Login Items.
+@MainActor
+final class LoginItem: ObservableObject {
+    @Published private(set) var isEnabled = LoginItem.readStatus()
+
+    func setEnabled(_ enabled: Bool) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+        } catch {
+            // Registration can wait for the user's approval; send them there.
+            if SMAppService.mainApp.status == .requiresApproval {
+                SMAppService.openSystemSettingsLoginItems()
+            }
+        }
+        isEnabled = Self.readStatus()
+    }
+
+    private static func readStatus() -> Bool {
+        SMAppService.mainApp.status == .enabled
+    }
+}

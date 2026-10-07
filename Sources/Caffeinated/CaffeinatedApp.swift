@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct CaffeinatedApp: App {
     @StateObject private var keeper = AwakeKeeper()
+    @StateObject private var loginItem = LoginItem()
 
     var body: some Scene {
         MenuBarExtra {
@@ -21,6 +22,10 @@ struct CaffeinatedApp: App {
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
+            Toggle("Launch at login", isOn: Binding(
+                get: { loginItem.isEnabled },
+                set: { loginItem.setEnabled($0) }
+            ))
             Divider()
             Button("Stop") { keeper.stop() }
                 .disabled(!keeper.isActive)

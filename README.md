@@ -19,7 +19,9 @@ macOS 13 (Ventura) or later.
 open build/Caffeinated.app
 ```
 
-To keep it, drag `build/Caffeinated.app` to `/Applications`.
+To keep it, drag `build/Caffeinated.app` to `/Applications`. Turn on
+"Launch at login" from the copy in `/Applications`, so the login item points
+there and not at the build folder.
 
 During development you can also run it straight from the package:
 
