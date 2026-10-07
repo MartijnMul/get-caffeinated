@@ -4,7 +4,9 @@
 an hour, three hours, eight hours or indefinitely, with one click.
 
 Caffeinated holds the same power assertion as `caffeinate -d`: the display
-does not go to sleep, and neither does the system.
+does not go to sleep, and neither does the system. Turn off "Keep screen on"
+to keep only the system awake and let the display sleep, like
+`caffeinate -i`, for downloads and builds.
 
 ## Requirements
 

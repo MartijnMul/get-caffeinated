@@ -20,6 +20,8 @@ struct CaffeinatedApp: App {
             Button("8 hours") { keeper.start(for: 8 * 60 * 60) }
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()
+            Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
+            Divider()
             Button("Stop") { keeper.stop() }
                 .disabled(!keeper.isActive)
             Divider()
