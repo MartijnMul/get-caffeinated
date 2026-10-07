@@ -8,7 +8,7 @@ struct CaffeinatedApp: App {
     var body: some Scene {
         MenuBarExtra {
             if let until = keeper.activeUntil {
-                Text("Awake until \(until.formatted(date: .omitted, time: .shortened))")
+                Text("Awake until \(label(for: until))")
             } else if keeper.isActive {
                 Text("Awake indefinitely")
             } else {
@@ -20,10 +20,14 @@ struct CaffeinatedApp: App {
             Button("3 hours") { keeper.start(for: 3 * 60 * 60) }
             Button("8 hours") { keeper.start(for: 8 * 60 * 60) }
             Menu("Until") {
-                ForEach(UntilTimes.times(from: menu.openedAt), id: \.self) { time in
-                    Button(time.formatted(date: .omitted, time: .shortened)) {
-                        keeper.start(until: time)
-                    }
+                let times = UntilTimes.times(from: menu.openedAt)
+                let today = times.filter { !isTomorrow($0) }
+                let tomorrow = times.filter(isTomorrow)
+                ForEach(today, id: \.self, content: untilButton)
+                if !tomorrow.isEmpty {
+                    if !today.isEmpty { Divider() }
+                    Text("Tomorrow")
+                    ForEach(tomorrow, id: \.self, content: untilButton)
                 }
             }
             Button("Indefinitely") { keeper.start(for: nil) }
@@ -42,5 +46,23 @@ struct CaffeinatedApp: App {
         } label: {
             Image(nsImage: keeper.isActive ? MenuBarIcon.awake : MenuBarIcon.idle)
         }
+    }
+
+    private func untilButton(_ time: Date) -> some View {
+        Button(time.formatted(date: .omitted, time: .shortened)) {
+            keeper.start(until: time)
+        }
+    }
+
+    /// Whether `date` falls on a later day than the moment the menu opened.
+    /// Sessions last at most 8 hours, so that can only be tomorrow.
+    private func isTomorrow(_ date: Date) -> Bool {
+        !Calendar.current.isDate(date, inSameDayAs: menu.openedAt)
+    }
+
+    /// "17:30", or "00:30 tomorrow" after midnight.
+    private func label(for date: Date) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        return isTomorrow(date) ? "\(time) tomorrow" : time
     }
 }
