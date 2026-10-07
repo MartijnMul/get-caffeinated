@@ -4,10 +4,12 @@ import ServiceManagement
 /// macOS, not in our settings, because people can also switch it off in
 /// System Settings > General > Login Items.
 @MainActor
-final class LoginItem: ObservableObject {
-    @Published private(set) var isEnabled = LoginItem.readStatus()
+enum LoginItem {
+    static var isEnabled: Bool {
+        SMAppService.mainApp.status == .enabled
+    }
 
-    func setEnabled(_ enabled: Bool) {
+    static func setEnabled(_ enabled: Bool) {
         do {
             if enabled {
                 try SMAppService.mainApp.register()
@@ -20,10 +22,5 @@ final class LoginItem: ObservableObject {
                 SMAppService.openSystemSettingsLoginItems()
             }
         }
-        isEnabled = Self.readStatus()
-    }
-
-    private static func readStatus() -> Bool {
-        SMAppService.mainApp.status == .enabled
     }
 }

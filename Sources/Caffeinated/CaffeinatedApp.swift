@@ -3,8 +3,7 @@ import SwiftUI
 @main
 struct CaffeinatedApp: App {
     @StateObject private var keeper = AwakeKeeper()
-    @StateObject private var loginItem = LoginItem()
-    @StateObject private var untilTimes = UntilTimes()
+    @StateObject private var menu = MenuOpening()
 
     var body: some Scene {
         MenuBarExtra {
@@ -21,7 +20,7 @@ struct CaffeinatedApp: App {
             Button("3 hours") { keeper.start(for: 3 * 60 * 60) }
             Button("8 hours") { keeper.start(for: 8 * 60 * 60) }
             Menu("Until") {
-                ForEach(untilTimes.times, id: \.self) { time in
+                ForEach(UntilTimes.times(from: menu.openedAt), id: \.self) { time in
                     Button(time.formatted(date: .omitted, time: .shortened)) {
                         keeper.start(until: time)
                     }
@@ -31,8 +30,8 @@ struct CaffeinatedApp: App {
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
             Toggle("Launch at login", isOn: Binding(
-                get: { loginItem.isEnabled },
-                set: { loginItem.setEnabled($0) }
+                get: { LoginItem.isEnabled },
+                set: { LoginItem.setEnabled($0) }
             ))
             Divider()
             Button("Stop") { keeper.stop() }
