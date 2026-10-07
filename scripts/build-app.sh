@@ -9,9 +9,10 @@ BIN="$(swift build -c release --show-bin-path)/Caffeinated"
 
 APP="build/Caffeinated.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Caffeinated"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+cp Resources/Icons/*.svg "$APP/Contents/Resources/"
 codesign --force --sign - "$APP"
 
 echo "Built $APP"

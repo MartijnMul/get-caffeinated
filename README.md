@@ -24,3 +24,10 @@ During development you can also run it straight from the package:
 ```sh
 swift run
 ```
+
+(`swift run` shows SF Symbols instead of the coffee icons, because those are
+only copied into the app bundle.)
+
+## Credits
+
+Menu bar icons from [Phosphor Icons](https://phosphoricons.com) (MIT).

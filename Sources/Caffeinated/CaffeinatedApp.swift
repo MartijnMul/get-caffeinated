@@ -5,7 +5,7 @@ struct CaffeinatedApp: App {
     @StateObject private var keeper = AwakeKeeper()
 
     var body: some Scene {
-        MenuBarExtra("Caffeinated", systemImage: keeper.isActive ? "cup.and.saucer.fill" : "cup.and.saucer") {
+        MenuBarExtra {
             if let until = keeper.activeUntil {
                 Text("Awake until \(until.formatted(date: .omitted, time: .shortened))")
             } else if keeper.isActive {
@@ -25,6 +25,8 @@ struct CaffeinatedApp: App {
             Divider()
             Button("Quit Caffeinated") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
+        } label: {
+            Image(nsImage: keeper.isActive ? MenuBarIcon.awake : MenuBarIcon.idle)
         }
     }
 }
