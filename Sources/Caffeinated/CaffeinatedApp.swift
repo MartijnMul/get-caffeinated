@@ -4,6 +4,7 @@ import SwiftUI
 struct CaffeinatedApp: App {
     @StateObject private var keeper = AwakeKeeper()
     @StateObject private var loginItem = LoginItem()
+    @StateObject private var untilTimes = UntilTimes()
 
     var body: some Scene {
         MenuBarExtra {
@@ -19,6 +20,13 @@ struct CaffeinatedApp: App {
             Button("1 hour") { keeper.start(for: 60 * 60) }
             Button("3 hours") { keeper.start(for: 3 * 60 * 60) }
             Button("8 hours") { keeper.start(for: 8 * 60 * 60) }
+            Menu("Until") {
+                ForEach(untilTimes.times, id: \.self) { time in
+                    Button(time.formatted(date: .omitted, time: .shortened)) {
+                        keeper.start(until: time)
+                    }
+                }
+            }
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)

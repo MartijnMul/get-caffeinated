@@ -39,13 +39,17 @@ final class AwakeKeeper: ObservableObject {
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
     func start(for duration: TimeInterval?) {
+        start(until: duration.map { Date().addingTimeInterval($0) })
+    }
+
+    /// Starts keeping the Mac awake until `end`. Pass `nil` to stay awake
+    /// until stopped.
+    func start(until end: Date?) {
         stop()
         guard holdAssertion() else { return }
 
-        if let duration {
-            activeUntil = Date().addingTimeInterval(duration)
-            scheduleTimer()
-        }
+        activeUntil = end
+        scheduleTimer()
     }
 
     func stop() {
