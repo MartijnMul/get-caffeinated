@@ -54,4 +54,5 @@ same license; improvements sent back as a pull request are very welcome.
 
 ## Credits
 
-Menu bar icons from [Phosphor Icons](https://phosphoricons.com) (MIT).
+Menu bar icons from [Phosphor Icons](https://phosphoricons.com), with thicker
+strokes; MIT license, see [`Resources/Icons/LICENSE`](Resources/Icons/LICENSE).
