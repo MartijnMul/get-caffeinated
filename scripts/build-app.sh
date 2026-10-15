@@ -13,6 +13,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/GetCaffeinated"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Resources/Icons/*.svg "$APP/Contents/Resources/"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 codesign --force --sign - "$APP"
 
 echo "Built $APP"

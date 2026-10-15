@@ -1,4 +1,7 @@
-# Get Caffeinated
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="branding/logo-dark.svg">
+  <img src="branding/logo-light.svg" alt="Get Caffeinated" width="420">
+</picture>
 
 `caffeinate`, in your macOS menu bar. Keep your Mac awake, with one click:
 
