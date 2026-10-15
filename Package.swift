@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "Caffeinated",
+    name: "GetCaffeinated",
     platforms: [.macOS(.v13)],
     targets: [
-        .executableTarget(name: "Caffeinated", path: "Sources/Caffeinated")
+        .executableTarget(name: "GetCaffeinated", path: "Sources/GetCaffeinated")
     ]
 )

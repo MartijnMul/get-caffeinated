@@ -16,7 +16,7 @@ enum MenuBarIcon {
     /// the bundle (`swift run`).
     private static func load(_ name: String, fallbackSymbol: String) -> NSImage {
         guard let outline = svg(name), let filled = svg("\(name)-fill") else {
-            let image = NSImage(systemSymbolName: fallbackSymbol, accessibilityDescription: "Caffeinated")!
+            let image = NSImage(systemSymbolName: fallbackSymbol, accessibilityDescription: "Get Caffeinated")!
             image.size = size
             image.isTemplate = true
             return image

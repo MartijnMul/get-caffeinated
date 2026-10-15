@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct CaffeinatedApp: App {
+struct GetCaffeinatedApp: App {
     @StateObject private var keeper = AwakeKeeper()
     @StateObject private var menu = MenuOpening()
 
@@ -51,7 +51,7 @@ struct CaffeinatedApp: App {
             Button("Stop") { keeper.stop() }
                 .disabled(!keeper.isActive)
             Divider()
-            Button("Quit Caffeinated") { NSApp.terminate(nil) }
+            Button("Quit Get Caffeinated") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         } label: {
             Image(nsImage: keeper.isActive ? MenuBarIcon.awake : MenuBarIcon.idle)

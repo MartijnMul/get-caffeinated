@@ -1,4 +1,4 @@
-# Caffeinated
+# Get Caffeinated
 
 `caffeinate`, in your macOS menu bar. Keep your Mac awake, with one click:
 
@@ -13,7 +13,7 @@
 Location Services permission and never asks for your location. It works on
 Wi-Fi and on a wired connection alike.
 
-Caffeinated holds the same power assertion as `caffeinate -d`: the display
+Get Caffeinated holds the same power assertion as `caffeinate -d`: the display
 does not go to sleep, and neither does the system. Turn off "Keep screen on"
 to keep only the system awake and let the display sleep, like
 `caffeinate -i`, for downloads and builds.
@@ -26,10 +26,10 @@ macOS 13 (Ventura) or later.
 
 ```sh
 ./scripts/build-app.sh
-open build/Caffeinated.app
+open "build/Get Caffeinated.app"
 ```
 
-To keep it, drag `build/Caffeinated.app` to `/Applications`. Turn on
+To keep it, drag `build/Get Caffeinated.app` to `/Applications`. Turn on
 "Launch at login" from the copy in `/Applications`, so the login item points
 there and not at the build folder.
 
@@ -46,8 +46,8 @@ only copied into the app bundle.)
 
 [Mozilla Public License 2.0](LICENSE). Use it, change it, ship it, also in
 your own or commercial software. If you distribute a changed version, the
-source of your changes to Caffeinated's files has to stay open under the same
-license; improvements sent back as a pull request are very welcome.
+source of your changes to Get Caffeinated's files has to stay open under the
+same license; improvements sent back as a pull request are very welcome.
 
 ## Credits
 

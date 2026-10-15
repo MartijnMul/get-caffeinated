@@ -117,7 +117,7 @@ final class AwakeKeeper: ObservableObject {
         let result = IOPMAssertionCreateWithName(
             type as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            "Caffeinated" as CFString,
+            "Get Caffeinated" as CFString,
             &newID
         )
         guard result == kIOReturnSuccess else { return false }

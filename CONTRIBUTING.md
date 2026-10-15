@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to make Caffeinated better. Bug reports, ideas and pull
+Thanks for wanting to make Get Caffeinated better. Bug reports, ideas and pull
 requests are all welcome.
 
 ## Reporting a bug
@@ -10,7 +10,7 @@ Open an issue with:
 - your macOS version and Mac model (Apple silicon or Intel, laptop or desktop);
 - what you did, what you expected, and what happened instead;
 - for a session that ended too early or not at all, the output of
-  `pmset -g assertions | grep Caffeinated` while it should be running.
+  `pmset -g assertions | grep "Get Caffeinated"` while it should be running.
 
 ## Building
 
@@ -18,8 +18,8 @@ You need macOS 13 or later and Swift 6 (Xcode 16 or later, or the
 command-line tools).
 
 ```sh
-./scripts/build-app.sh      # builds build/Caffeinated.app
-open build/Caffeinated.app
+./scripts/build-app.sh      # builds "build/Get Caffeinated.app"
+open "build/Get Caffeinated.app"
 ```
 
 `swift run` works too, but shows SF Symbols instead of the coffee icons, and
@@ -30,7 +30,7 @@ new build.
 
 | File | What it does |
 |---|---|
-| `CaffeinatedApp.swift` | The menu: the items, the status line, the toggles. |
+| `GetCaffeinatedApp.swift` | The menu: the items, the status line, the toggles. |
 | `AwakeKeeper.swift` | Holds the power assertion and decides when a session ends. |
 | `UntilTimes.swift` | The end times offered in the "Until" submenu. |
 | `PowerSource.swift` | Power adapter or battery, and change notifications ("Until unplugged"). |
@@ -70,6 +70,6 @@ them needs a good reason in its description.
 
 ## License
 
-Caffeinated is licensed under the [Mozilla Public License 2.0](LICENSE). By
+Get Caffeinated is licensed under the [Mozilla Public License 2.0](LICENSE). By
 opening a pull request you agree that your contribution is licensed under it
 too.

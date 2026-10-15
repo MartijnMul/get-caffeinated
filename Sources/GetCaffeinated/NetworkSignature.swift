@@ -9,7 +9,7 @@ enum NetworkSignature {
     /// address, such as "IPv4.Router=192.168.1.1;IPv4.RouterHardwareAddress=…".
     /// VPN tunnels have no router hardware address and are left out.
     static var current: Set<String> {
-        guard let store = SCDynamicStoreCreate(nil, "Caffeinated" as CFString, nil, nil),
+        guard let store = SCDynamicStoreCreate(nil, "Get Caffeinated" as CFString, nil, nil),
               let keys = SCDynamicStoreCopyKeyList(store, "State:/Network/Service/[^/]+/IPv4" as CFString) as? [String]
         else { return [] }
 

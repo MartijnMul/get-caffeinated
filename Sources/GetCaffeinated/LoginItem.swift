@@ -1,6 +1,6 @@
 import ServiceManagement
 
-/// Starts Caffeinated at login, through `SMAppService`. The state lives in
+/// Starts Get Caffeinated at login, through `SMAppService`. The state lives in
 /// macOS, not in our settings, because people can also switch it off in
 /// System Settings > General > Login Items.
 @MainActor
