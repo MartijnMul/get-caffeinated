@@ -14,8 +14,7 @@ Open an issue with:
 
 ## Building
 
-You need macOS 13 or later and Swift 6 (Xcode 16 or later, or the
-command-line tools).
+You need Swift 6: Xcode 16 or later, or its command-line tools.
 
 ```sh
 ./scripts/build-app.sh      # builds "build/Get Caffeinated.app"

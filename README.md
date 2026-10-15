@@ -23,7 +23,10 @@ to keep only the system awake and let the display sleep, like
 
 ## Requirements
 
-macOS 13 (Ventura) or later.
+Developed and tested on the current macOS. The app is built to run on
+macOS 13 (Ventura) and later, but versions before the current one have not
+been tested yet; if you try one, an issue saying whether it works is very
+welcome.
 
 ## Build
 
