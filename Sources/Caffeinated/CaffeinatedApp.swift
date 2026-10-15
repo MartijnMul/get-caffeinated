@@ -9,6 +9,8 @@ struct CaffeinatedApp: App {
         MenuBarExtra {
             if let until = keeper.activeUntil {
                 Text("Awake until \(label(for: until))")
+            } else if keeper.endsWhenUnplugged {
+                Text("Awake until unplugged")
             } else if keeper.isActive {
                 Text("Awake indefinitely")
             } else {
@@ -29,6 +31,10 @@ struct CaffeinatedApp: App {
                     Text("Tomorrow")
                     ForEach(tomorrow, id: \.self, content: untilButton)
                 }
+            }
+            if PowerSource.hasBattery {
+                Button("Until unplugged") { keeper.startUntilUnplugged() }
+                    .disabled(!PowerSource.isOnAC)
             }
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()

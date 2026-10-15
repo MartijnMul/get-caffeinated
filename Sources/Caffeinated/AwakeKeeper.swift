@@ -8,6 +8,8 @@ import IOKit.pwr_mgt
 final class AwakeKeeper: ObservableObject {
     @Published private(set) var isActive = false
     @Published private(set) var activeUntil: Date?
+    /// The session ends when the power adapter is disconnected.
+    @Published private(set) var endsWhenUnplugged = false
 
     /// Keep the display on as well, or only the system. Remembered between
     /// launches, and applied straight away to a running session.
@@ -33,8 +35,13 @@ final class AwakeKeeper: ObservableObject {
         wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.scheduleTimer() }
+            MainActor.assumeIsolated {
+                self?.scheduleTimer()
+                self?.stopIfUnplugged()
+            }
         }
+
+        PowerSource.observeChanges { [weak self] in self?.stopIfUnplugged() }
     }
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
@@ -52,10 +59,19 @@ final class AwakeKeeper: ObservableObject {
         scheduleTimer()
     }
 
+    /// Starts keeping the Mac awake until the power adapter is disconnected.
+    /// Does nothing on battery.
+    func startUntilUnplugged() {
+        guard PowerSource.isOnAC else { return }
+        start(until: nil)
+        endsWhenUnplugged = isActive
+    }
+
     func stop() {
         timer?.invalidate()
         timer = nil
         activeUntil = nil
+        endsWhenUnplugged = false
         if isActive {
             IOPMAssertionRelease(assertionID)
             isActive = false
@@ -82,6 +98,10 @@ final class AwakeKeeper: ObservableObject {
         assertionID = newID
         isActive = true
         return true
+    }
+
+    private func stopIfUnplugged() {
+        if endsWhenUnplugged && !PowerSource.isOnAC { stop() }
     }
 
     /// Sets the timer to fire at `activeUntil`, or stops right away if that
