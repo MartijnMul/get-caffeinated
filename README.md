@@ -28,16 +28,39 @@ macOS 13 (Ventura) and later, but versions before the current one have not
 been tested yet; if you try one, an issue saying whether it works is very
 welcome.
 
-## Build
+## Install
+
+1. Download `Get-Caffeinated-<version>.dmg` from the
+   [latest release](https://github.com/MartijnMul/get-caffeinated/releases/latest)
+   and open it.
+2. Drag Get Caffeinated onto the Applications shortcut next to it, then
+   eject the disk image.
+3. Open Get Caffeinated from Applications. macOS will say it cannot verify
+   the app and offer only "Done" or "Move to Trash": choose Done.
+4. Open System Settings → Privacy & Security, scroll down to "Get
+   Caffeinated was blocked", click **Open Anyway** and confirm.
+
+You only do steps 3 and 4 once. They are needed because the app is not
+notarised by Apple, which requires a paid developer account; the app is
+signed locally instead, and its full source is right here. If you prefer
+Terminal over steps 3 and 4:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/Get Caffeinated.app"
+```
+
+Turn on "Launch at login" from the copy in Applications, so the login item
+points there.
+
+## Build from source
 
 ```sh
 ./scripts/build-app.sh
 open "build/Get Caffeinated.app"
 ```
 
-To keep it, drag `build/Get Caffeinated.app` to `/Applications`. Turn on
-"Launch at login" from the copy in `/Applications`, so the login item points
-there and not at the build folder.
+To keep it, drag `build/Get Caffeinated.app` to `/Applications`, as above.
+A build of your own opens without the "Open Anyway" step.
 
 During development you can also run it straight from the package:
 

@@ -1,11 +1,20 @@
 #!/bin/sh
 # Builds "Get Caffeinated.app" into ./build (ad-hoc signed, for local use).
+# With --universal it builds for both Apple silicon and Intel, as a release
+# needs; without, only for this Mac, which is faster.
 set -eu
 
 cd "$(dirname "$0")/.."
 
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/GetCaffeinated"
+ARCHS=""
+if [ "${1:-}" = "--universal" ]; then
+    ARCHS="--arch arm64 --arch x86_64"
+fi
+
+# shellcheck disable=SC2086 # ARCHS is meant to split into separate flags
+swift build -c release $ARCHS
+# shellcheck disable=SC2086
+BIN="$(swift build -c release $ARCHS --show-bin-path)/GetCaffeinated"
 
 APP="build/Get Caffeinated.app"
 rm -rf "$APP"

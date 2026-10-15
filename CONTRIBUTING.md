@@ -21,6 +21,9 @@ You need Swift 6: Xcode 16 or later, or its command-line tools.
 open "build/Get Caffeinated.app"
 ```
 
+`./scripts/release.sh` builds for both Apple silicon and Intel and packs the
+disk image for a GitHub release, named after the version in `Resources/Info.plist`.
+
 `swift run` works too, but shows SF Symbols instead of the coffee icons, and
 "Launch at login" needs the app bundle. Quit a running copy before you open a
 new build.
