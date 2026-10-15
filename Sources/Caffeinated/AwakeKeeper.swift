@@ -10,6 +10,8 @@ final class AwakeKeeper: ObservableObject {
     @Published private(set) var activeUntil: Date?
     /// The session ends when the power adapter is disconnected.
     @Published private(set) var endsWhenUnplugged = false
+    /// The session ends when the Mac leaves the network it started on.
+    @Published private(set) var endsOnLeavingNetwork = false
 
     /// Keep the display on as well, or only the system. Remembered between
     /// launches, and applied straight away to a running session.
@@ -21,9 +23,14 @@ final class AwakeKeeper: ObservableObject {
     }
 
     private static let keepsScreenOnKey = "keepsScreenOn"
+    /// How long the network may be gone before the session ends, so a Wi-Fi
+    /// hiccup does not end it.
+    private static let networkGracePeriod: TimeInterval = 2 * 60
 
     private var assertionID: IOPMAssertionID = 0
     private var timer: Timer?
+    private var startNetworks: Set<String> = []
+    private var networkGraceTimer: Timer?
     private var wakeObserver: NSObjectProtocol?
 
     init() {
@@ -38,10 +45,16 @@ final class AwakeKeeper: ObservableObject {
             MainActor.assumeIsolated {
                 self?.scheduleTimer()
                 self?.stopIfUnplugged()
+                // A grace period that ran while asleep says nothing; Wi-Fi
+                // reconnects only after waking. Start counting again.
+                self?.networkGraceTimer?.invalidate()
+                self?.networkGraceTimer = nil
+                self?.checkNetwork()
             }
         }
 
         PowerSource.observeChanges { [weak self] in self?.stopIfUnplugged() }
+        NetworkSignature.observeChanges { [weak self] in self?.checkNetwork() }
     }
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
@@ -67,11 +80,26 @@ final class AwakeKeeper: ObservableObject {
         endsWhenUnplugged = isActive
     }
 
+    /// Starts keeping the Mac awake until it leaves the network it is on now.
+    /// Does nothing without a network.
+    func startUntilLeavingNetwork() {
+        let networks = NetworkSignature.current
+        guard !networks.isEmpty else { return }
+        start(until: nil)
+        guard isActive else { return }
+        startNetworks = networks
+        endsOnLeavingNetwork = true
+    }
+
     func stop() {
         timer?.invalidate()
         timer = nil
+        networkGraceTimer?.invalidate()
+        networkGraceTimer = nil
         activeUntil = nil
         endsWhenUnplugged = false
+        endsOnLeavingNetwork = false
+        startNetworks = []
         if isActive {
             IOPMAssertionRelease(assertionID)
             isActive = false
@@ -102,6 +130,24 @@ final class AwakeKeeper: ObservableObject {
 
     private func stopIfUnplugged() {
         if endsWhenUnplugged && !PowerSource.isOnAC { stop() }
+    }
+
+    /// Ends the session on another network straight away. Without any
+    /// network it waits for the grace period, in case the old one comes back.
+    private func checkNetwork() {
+        guard endsOnLeavingNetwork else { return }
+        let networks = NetworkSignature.current
+
+        if !networks.isDisjoint(with: startNetworks) {
+            networkGraceTimer?.invalidate()
+            networkGraceTimer = nil
+        } else if !networks.isEmpty {
+            stop()
+        } else if networkGraceTimer == nil {
+            networkGraceTimer = Timer.scheduledTimer(withTimeInterval: Self.networkGracePeriod, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated { self?.stop() }
+            }
+        }
     }
 
     /// Sets the timer to fire at `activeUntil`, or stops right away if that

@@ -11,6 +11,8 @@ struct CaffeinatedApp: App {
                 Text("Awake until \(label(for: until))")
             } else if keeper.endsWhenUnplugged {
                 Text("Awake until unplugged")
+            } else if keeper.endsOnLeavingNetwork {
+                Text("Awake until you leave this network")
             } else if keeper.isActive {
                 Text("Awake indefinitely")
             } else {
@@ -36,6 +38,8 @@ struct CaffeinatedApp: App {
                 Button("Until unplugged") { keeper.startUntilUnplugged() }
                     .disabled(!PowerSource.isOnAC)
             }
+            Button("Until I leave") { keeper.startUntilLeavingNetwork() }
+                .disabled(NetworkSignature.current.isEmpty)
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
