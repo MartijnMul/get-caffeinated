@@ -1,0 +1,75 @@
+# Contributing
+
+Thanks for wanting to make Caffeinated better. Bug reports, ideas and pull
+requests are all welcome.
+
+## Reporting a bug
+
+Open an issue with:
+
+- your macOS version and Mac model (Apple silicon or Intel, laptop or desktop);
+- what you did, what you expected, and what happened instead;
+- for a session that ended too early or not at all, the output of
+  `pmset -g assertions | grep Caffeinated` while it should be running.
+
+## Building
+
+You need macOS 13 or later and Swift 6 (Xcode 16 or later, or the
+command-line tools).
+
+```sh
+./scripts/build-app.sh      # builds build/Caffeinated.app
+open build/Caffeinated.app
+```
+
+`swift run` works too, but shows SF Symbols instead of the coffee icons, and
+"Launch at login" needs the app bundle. Quit a running copy before you open a
+new build.
+
+## How the code is laid out
+
+| File | What it does |
+|---|---|
+| `CaffeinatedApp.swift` | The menu: the items, the status line, the toggles. |
+| `AwakeKeeper.swift` | Holds the power assertion and decides when a session ends. |
+| `UntilTimes.swift` | The end times offered in the "Until" submenu. |
+| `PowerSource.swift` | Power adapter or battery, and change notifications ("Until unplugged"). |
+| `NetworkSignature.swift` | Recognises the current network by its router ("Until I leave"). |
+| `MenuOpening.swift` | Rebuilds the menu each time it opens, so times and states are fresh. |
+| `MenuBarIcon.swift` | The bean and cup icons, outline or filled to match the menu bar. |
+| `LoginItem.swift` | "Launch at login", through `SMAppService`. |
+
+## Ground rules
+
+These keep the app small and trustworthy. A pull request that breaks one of
+them needs a good reason in its description.
+
+- **Talk to IOKit directly.** Keep the Mac awake with
+  `IOPMAssertionCreateWithName`; never run `caffeinate` or other shell
+  commands.
+- **No permissions.** The app asks for nothing: no Location Services, no
+  Accessibility, no network access. That is why "Until I leave" reads the
+  router instead of the Wi-Fi name.
+- **No dependencies.** System frameworks only.
+- **macOS 13 and Swift 6 language mode.** Code that needs a newer macOS goes
+  behind `if #available`, with a fallback.
+- **Comments explain why,** not what. Look at the existing doc comments for
+  the tone.
+
+## Pull requests
+
+- One change per pull request; small is easier to review.
+- Commit messages in the imperative, as in the history: "Add …", "Fix …",
+  "End timed sessions on time after the Mac sleeps". Explain the reason in
+  the body when it is not obvious.
+- Describe how you tested it. There are no automated tests yet, so say what
+  you clicked and on which macOS version. For anything that keeps the Mac
+  awake, check `pmset -g assertions` before and after.
+- For a larger change or a new keep-awake mode, open an issue first, so we
+  can agree on the approach before you spend time on it.
+
+## License
+
+Caffeinated is licensed under the [Mozilla Public License 2.0](LICENSE). By
+opening a pull request you agree that your contribution is licensed under it
+too.
