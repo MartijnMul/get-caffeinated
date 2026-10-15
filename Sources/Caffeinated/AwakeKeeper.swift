@@ -25,7 +25,7 @@ final class AwakeKeeper: ObservableObject {
     private static let keepsScreenOnKey = "keepsScreenOn"
     /// How long the network may be gone before the session ends, so a Wi-Fi
     /// hiccup does not end it.
-    private static let networkGracePeriod: TimeInterval = 2 * 60
+    private static let networkGracePeriod: TimeInterval = 30
 
     private var assertionID: IOPMAssertionID = 0
     private var timer: Timer?
