@@ -63,6 +63,16 @@ only asks about apps downloaded through a browser.
 
 Either way, turn on "Launch at login" from the copy in Applications.
 
+### Uninstall
+
+Turn off "Launch at login", choose Quit Get Caffeinated, and drag the app
+from Applications to the Bin. If you ever switched "Keep screen on", that
+setting stays behind; to remove it too:
+
+```sh
+defaults delete io.github.martijnmul.getcaffeinated
+```
+
 ## Build from source
 
 ```sh
