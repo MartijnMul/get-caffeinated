@@ -32,7 +32,9 @@ times and what "Until I leave" does when the network changes. CI runs them
 on every push and pull request, and builds the app for both architectures.
 
 `./scripts/release.sh` builds for both Apple silicon and Intel and packs
-`build/Get-Caffeinated.dmg`. Attach it to a GitHub release tagged with the
+`build/Get-Caffeinated.dmg`. With a Developer ID certificate in the keychain
+it also signs and notarises it; without one, the app is ad-hoc signed, as a
+build of your own is. Attach the disk image to a GitHub release tagged with the
 version from `Resources/Info.plist` (such as `v1.0.0`). Keep the file name:
 `install.sh` downloads exactly that name from the latest release.
 
