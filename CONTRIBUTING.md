@@ -5,21 +5,31 @@ requests are all welcome.
 
 ## Reporting a bug
 
-Open an issue with:
+[Open an issue](https://github.com/MartijnMul/get-caffeinated/issues/new/choose)
+and pick the bug report. It asks for:
 
 - your macOS version and Mac model (Apple silicon or Intel, laptop or desktop);
 - what you did, what you expected, and what happened instead;
 - for a session that ended too early or not at all, the output of
   `pmset -g assertions | grep "Get Caffeinated"` while it should be running.
 
+Running it on a macOS other than the current one? The macOS version report
+takes a minute and helps, also when everything works. A security problem
+goes through [SECURITY.md](SECURITY.md) instead, not a public issue.
+
 ## Building
 
 You need Swift 6: Xcode 16 or later, or its command-line tools.
 
 ```sh
+swift test                  # runs the tests
 ./scripts/build-app.sh      # builds "build/Get Caffeinated.app"
 open "build/Get Caffeinated.app"
 ```
+
+The tests cover the logic that does not need a running Mac: the "Until"
+times and what "Until I leave" does when the network changes. CI runs them
+on every push and pull request, and builds the app for both architectures.
 
 `./scripts/release.sh` builds for both Apple silicon and Intel and packs
 `build/Get-Caffeinated.dmg`. Attach it to a GitHub release tagged with the
@@ -39,9 +49,12 @@ new build.
 | `UntilTimes.swift` | The end times offered in the "Until" submenu. |
 | `PowerSource.swift` | Power adapter or battery, and change notifications ("Until unplugged"). |
 | `NetworkSignature.swift` | Recognises the current network by its router ("Until I leave"). |
+| `NetworkCheck.swift` | Decides whether a network change ends an "Until I leave" session. |
 | `MenuOpening.swift` | Rebuilds the menu each time it opens, so times and states are fresh. |
 | `MenuBarIcon.swift` | The bean and cup icons, outline or filled to match the menu bar. |
 | `LoginItem.swift` | "Launch at login", through `SMAppService`. |
+
+Tests live in `Tests/GetCaffeinatedTests`, written with Swift Testing.
 
 ## Ground rules
 
@@ -66,9 +79,12 @@ them needs a good reason in its description.
 - Commit messages in the imperative, as in the history: "Add …", "Fix …",
   "End timed sessions on time after the Mac sleeps". Explain the reason in
   the body when it is not obvious.
-- Describe how you tested it. There are no automated tests yet, so say what
-  you clicked and on which macOS version. For anything that keeps the Mac
-  awake, check `pmset -g assertions` before and after.
+- Add or update tests for logic that can run without the system, and keep
+  `swift test` passing.
+- Describe how you tested it in the app: what you clicked and on which macOS
+  version. Keeping a Mac awake cannot be tested automatically, so for
+  anything that does, check `pmset -g assertions` before and after. The pull
+  request template has a checklist.
 - For a larger change or a new keep-awake mode, open an issue first, so we
   can agree on the approach before you spend time on it.
 

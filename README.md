@@ -3,6 +3,12 @@
   <img src="branding/logo-light.svg" alt="Get Caffeinated" width="420">
 </picture>
 
+[![CI](https://github.com/MartijnMul/get-caffeinated/actions/workflows/ci.yml/badge.svg)](https://github.com/MartijnMul/get-caffeinated/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/MartijnMul/get-caffeinated)](https://github.com/MartijnMul/get-caffeinated/releases/latest)
+[![License: MPL-2.0](https://img.shields.io/github/license/MartijnMul/get-caffeinated)](LICENSE)
+![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138)
+
 `caffeinate`, in your macOS menu bar. Keep your Mac awake, with one click:
 
 - for 15 minutes, an hour, three hours or eight hours;
@@ -75,6 +81,9 @@ swift run
 
 (`swift run` shows SF Symbols instead of the coffee icons, because those are
 only copied into the app bundle.)
+
+Run the tests with `swift test`. [CONTRIBUTING.md](CONTRIBUTING.md) has the
+code layout and the ground rules for pull requests.
 
 ## License
 
