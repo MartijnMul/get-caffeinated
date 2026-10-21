@@ -23,7 +23,7 @@ open "build/Get Caffeinated.app"
 
 `./scripts/release.sh` builds for both Apple silicon and Intel and packs
 `build/Get-Caffeinated.dmg`. Attach it to a GitHub release tagged with the
-version from `Resources/Info.plist` (`v0.1.0`). Keep the file name:
+version from `Resources/Info.plist` (such as `v1.0.0`). Keep the file name:
 `install.sh` downloads exactly that name from the latest release.
 
 `swift run` works too, but shows SF Symbols instead of the coffee icons, and
