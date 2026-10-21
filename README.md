@@ -18,7 +18,7 @@
   or after 30 seconds without one;
 - or indefinitely, until you stop it.
 
-<img src="screenshots/menu.png" alt="The Get Caffeinated menu, open during a session: Awake until 12:36, the durations, Until, Until unplugged, Until I leave, Indefinitely, and the Keep screen on and Launch at login toggles" width="264">
+<img src="screenshots/menu.png" alt="The Get Caffeinated menu, open during a session: Awake until unplugged, the durations, Until, Until unplugged, Until I leave, Indefinitely, and the Keep screen on and Launch at login toggles" width="276">
 
 "Until I leave" recognises the network by its router, so it needs no
 Location Services permission and never asks for your location. It works on
