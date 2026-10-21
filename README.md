@@ -7,7 +7,7 @@
 [![Latest release](https://img.shields.io/github/v/release/MartijnMul/get-caffeinated)](https://github.com/MartijnMul/get-caffeinated/releases/latest)
 [![License: MPL-2.0](https://img.shields.io/github/license/MartijnMul/get-caffeinated)](LICENSE)
 ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
-![Swift 6](https://img.shields.io/badge/Swift-6-F05138)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 
 `caffeinate`, in your macOS menu bar. Keep your Mac awake, with one click:
 
