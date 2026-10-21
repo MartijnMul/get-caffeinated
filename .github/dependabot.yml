@@ -1,0 +1,8 @@
+# Keeps the actions in .github/workflows current. The app itself has no
+# dependencies to watch.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
