@@ -132,18 +132,17 @@ final class AwakeKeeper: ObservableObject {
         if endsWhenUnplugged && !PowerSource.isOnAC { stop() }
     }
 
-    /// Ends the session on another network straight away. Without any
-    /// network it waits for the grace period, in case the old one comes back.
     private func checkNetwork() {
         guard endsOnLeavingNetwork else { return }
-        let networks = NetworkSignature.current
 
-        if !networks.isDisjoint(with: startNetworks) {
+        switch NetworkCheck.decide(current: NetworkSignature.current, start: startNetworks) {
+        case .stay:
             networkGraceTimer?.invalidate()
             networkGraceTimer = nil
-        } else if !networks.isEmpty {
+        case .leave:
             stop()
-        } else if networkGraceTimer == nil {
+        case .wait:
+            guard networkGraceTimer == nil else { return }
             networkGraceTimer = Timer.scheduledTimer(withTimeInterval: Self.networkGracePeriod, repeats: false) { [weak self] _ in
                 MainActor.assumeIsolated { self?.stop() }
             }
