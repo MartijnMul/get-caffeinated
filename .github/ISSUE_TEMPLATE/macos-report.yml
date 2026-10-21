@@ -1,0 +1,39 @@
+name: macOS version report
+description: Tell whether Get Caffeinated works on your macOS version.
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Get Caffeinated is built for macOS 13 and later, but has only been
+        tested on the current macOS. A short report helps, also when
+        everything works.
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 13.6
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac model
+      placeholder: MacBook Pro, Intel
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What works
+      options:
+        - label: The coffee bean shows in the menu bar, filled on a light menu bar
+        - label: A timed session (15 minutes, an hour, or an "Until" time)
+        - label: Until unplugged
+        - label: Until I leave
+        - label: Keep screen on, switched off
+        - label: Launch at login
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything that did not work

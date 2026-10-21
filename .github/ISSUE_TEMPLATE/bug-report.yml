@@ -1,0 +1,41 @@
+name: Bug report
+description: Something does not work as it should.
+labels: [bug]
+body:
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 15.5
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac model
+      description: Apple silicon or Intel, laptop or desktop.
+      placeholder: MacBook Air, Apple silicon
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Get Caffeinated version
+      description: Finder → Applications → Get Caffeinated → Get Info.
+      placeholder: 1.0.0
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: assertions
+    attributes:
+      label: Power assertions
+      description: >
+        For a session that ended too early or not at all: the output of this
+        command in Terminal while the session should be running.
+      placeholder: pmset -g assertions | grep "Get Caffeinated"
+      render: text

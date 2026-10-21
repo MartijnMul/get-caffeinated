@@ -1,0 +1,21 @@
+name: Idea
+description: Suggest a new keep-awake mode or another improvement.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Get Caffeinated stays small on purpose: no permissions, no
+        dependencies, one menu. See the ground rules in
+        [CONTRIBUTING.md](https://github.com/MartijnMul/get-caffeinated/blob/main/CONTRIBUTING.md#ground-rules).
+  - type: textarea
+    id: situation
+    attributes:
+      label: When would you use it
+      description: The situation, not the solution. When do you want your Mac to stay awake, and why does the current menu not cover it?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you have in mind
