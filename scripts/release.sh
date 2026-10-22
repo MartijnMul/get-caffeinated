@@ -24,8 +24,11 @@ APP="build/Get Caffeinated.app"
 DMG="build/Get-Caffeinated.dmg"
 STAGING="build/dmg"
 NOTARY_PROFILE="${NOTARY_PROFILE:-notary}"
+# The certificate goes by its SHA-1 hash: codesign fails to match a name with
+# an accent in it, such as "Mullié".
 IDENTITY="${SIGN_IDENTITY:-$(security find-identity -v -p codesigning \
-    | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -n 1)}"
+    | sed -n 's/.*) \([0-9A-F]\{40\}\) "Developer ID Application: .*"/\1/p' \
+    | head -n 1)}"
 
 ./scripts/build-app.sh --universal
 

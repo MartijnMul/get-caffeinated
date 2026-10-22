@@ -52,14 +52,12 @@ short; read it first if you like.
 
 1. Download [`Get-Caffeinated.dmg`](https://github.com/MartijnMul/get-caffeinated/releases/latest/download/Get-Caffeinated.dmg),
    open it and drag Get Caffeinated onto the Applications shortcut.
-2. Open Get Caffeinated from Applications. macOS shows *"Get Caffeinated"
-   Not Opened*: choose Done.
-3. Open System Settings → Privacy & Security, scroll down to *"Get
-   Caffeinated" was blocked*, click **Open Anyway** and confirm.
+2. Open Get Caffeinated from Applications. The first time, macOS asks
+   whether you are sure you want to open an app downloaded from the
+   internet: choose **Open**.
 
-Steps 2 and 3 are needed once, because the app is not notarised by Apple,
-which takes a paid developer account. The Terminal install skips them: macOS
-only asks about apps downloaded through a browser.
+The app is signed and notarised by Apple. The Terminal install skips that
+question: macOS only asks about apps downloaded through a browser.
 
 Either way, turn on "Launch at login" from the copy in Applications.
 
@@ -81,7 +79,7 @@ open "build/Get Caffeinated.app"
 ```
 
 To keep it, drag `build/Get Caffeinated.app` to `/Applications`, as above.
-A build of your own opens without the "Open Anyway" step.
+A build of your own opens without asking.
 
 During development you can also run it straight from the package:
 
