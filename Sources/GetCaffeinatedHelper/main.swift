@@ -66,10 +66,12 @@ final class LidAwakeDaemon: NSObject, NSXPCListenerDelegate, LidAwakeService, @u
         connection.exportedObject = self
         connection.remoteObjectInterface = NSXPCInterface(with: LidAwakeEvents.self)
 
-        // Invalidation follows interruption, so count only that.
+        // Invalidation follows interruption, so count only that. A strong
+        // capture is fine: the daemon lives as long as the process, and the
+        // Swift 6.1 compiler rejects sending a weak `self` to the main queue.
         let id = ObjectIdentifier(connection)
-        connection.invalidationHandler = { [weak self] in
-            DispatchQueue.main.async { self?.connectionEnded(id) }
+        connection.invalidationHandler = { [self] in
+            DispatchQueue.main.async { [self] in connectionEnded(id) }
         }
         DispatchQueue.main.async { [self] in
             connections += 1
