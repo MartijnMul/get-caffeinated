@@ -14,6 +14,8 @@ struct GetCaffeinatedApp: App {
                 Text("Awake until \(label(for: until))")
             } else if keeper.endsWhenUnplugged {
                 Text("Awake until unplugged")
+            } else if keeper.endsWhenLidCloses {
+                Text("Awake until the lid closes")
             } else if keeper.endsOnLeavingNetwork {
                 Text("Awake until you leave this network")
             } else if keeper.isActive {
@@ -40,6 +42,10 @@ struct GetCaffeinatedApp: App {
             if PowerSource.hasBattery {
                 Button("Until unplugged") { keeper.startUntilUnplugged() }
                     .disabled(!PowerSource.isOnAC)
+            }
+            if Lid.exists {
+                Button("Until lid closed") { keeper.startUntilLidClosed() }
+                    .disabled(Lid.isClosed)
             }
             Button("Until I leave") { keeper.startUntilLeavingNetwork() }
                 .disabled(NetworkSignature.current.isEmpty)

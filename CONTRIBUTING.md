@@ -49,6 +49,7 @@ new build.
 | `GetCaffeinatedApp.swift` | The menu: the items, the status line, the toggles. |
 | `AwakeKeeper.swift` | Holds the power assertion and decides when a session ends. |
 | `UntilTimes.swift` | The end times offered in the "Until" submenu. |
+| `Lid.swift` | Whether the lid is closed, and change notifications ("Until lid closed"). |
 | `PowerSource.swift` | Power adapter or battery, and change notifications ("Until unplugged"). |
 | `NetworkSignature.swift` | Recognises the current network by its router ("Until I leave"). |
 | `NetworkCheck.swift` | Decides whether a network change ends an "Until I leave" session. |

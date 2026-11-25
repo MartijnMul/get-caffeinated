@@ -14,6 +14,8 @@
 - for 15 minutes, an hour, three hours or eight hours;
 - until a time of your choosing, every half hour up to eight hours ahead;
 - until you unplug the power adapter, on a Mac with a battery;
+- until you close the lid of your MacBook, also when an external display
+  keeps it awake;
 - until you leave: the session ends when the Mac moves to another network,
   or after 30 seconds without one;
 - or indefinitely, until you stop it.

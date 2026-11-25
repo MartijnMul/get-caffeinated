@@ -13,6 +13,8 @@ final class AwakeKeeper: ObservableObject {
     @Published private(set) var endsWhenUnplugged = false
     /// The session ends when the Mac leaves the network it started on.
     @Published private(set) var endsOnLeavingNetwork = false
+    /// The session ends when the MacBook lid closes.
+    @Published private(set) var endsWhenLidCloses = false
     /// A lid-closed session: closing the lid does not put the Mac to sleep.
     /// Always on a timer of at most `LidAwake.maximumDuration`.
     @Published private(set) var staysAwakeWithLidClosed = false
@@ -36,6 +38,7 @@ final class AwakeKeeper: ObservableObject {
     private var startNetworks: Set<String> = []
     private var networkGraceTimer: Timer?
     private var wakeObserver: NSObjectProtocol?
+    private var sleepObserver: NSObjectProtocol?
     private let lid = LidAwakeClient()
     /// Counts sessions, so a helper reply that outlived its session does not
     /// apply to the next one.
@@ -61,7 +64,17 @@ final class AwakeKeeper: ObservableObject {
             }
         }
 
+        // Closing the lid usually puts the Mac to sleep at once, so the lid
+        // message may only arrive on wake; checking before sleep as well
+        // makes sure the session never outlives the closed lid.
+        sleepObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.willSleepNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.stopIfLidClosed() }
+        }
+
         PowerSource.observeChanges { [weak self] in self?.stopIfUnplugged() }
+        Lid.observeChanges { [weak self] in self?.stopIfLidClosed() }
         NetworkSignature.observeChanges { [weak self] in self?.checkNetwork() }
         // The helper ended it on its own (time up, low battery, too hot) or
         // went away: the lid-closed session is over.
@@ -104,6 +117,14 @@ final class AwakeKeeper: ObservableObject {
         endsOnLeavingNetwork = true
     }
 
+    /// Starts keeping the Mac awake until the lid closes. Does nothing while
+    /// the lid is already closed.
+    func startUntilLidClosed() {
+        guard Lid.exists, !Lid.isClosed else { return }
+        start(until: nil)
+        endsWhenLidCloses = isActive
+    }
+
     /// Starts a lid-closed session of `minutes`, at most
     /// `LidAwake.maximumDuration`: the Mac stays awake with the lid shut, and
     /// sleeps when the time is up. Asks for Touch ID or the password first;
@@ -136,6 +157,7 @@ final class AwakeKeeper: ObservableObject {
         activeUntil = nil
         endsWhenUnplugged = false
         endsOnLeavingNetwork = false
+        endsWhenLidCloses = false
         startNetworks = []
         if isActive {
             IOPMAssertionRelease(assertionID)
@@ -175,6 +197,10 @@ final class AwakeKeeper: ObservableObject {
 
     private func stopIfUnplugged() {
         if endsWhenUnplugged && !PowerSource.isOnAC { stop() }
+    }
+
+    private func stopIfLidClosed() {
+        if endsWhenLidCloses && Lid.isClosed { stop() }
     }
 
     private func checkNetwork() {
