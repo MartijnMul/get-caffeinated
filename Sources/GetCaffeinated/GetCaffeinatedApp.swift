@@ -43,6 +43,13 @@ struct GetCaffeinatedApp: App {
             Button("Indefinitely") { keeper.start(for: nil) }
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
+            if LidAwakeClient.isAvailable {
+                Toggle("Awake with lid closed", isOn: Binding(
+                    get: { keeper.staysAwakeWithLidClosed },
+                    set: { enabled in Task { await keeper.setStaysAwakeWithLidClosed(enabled) } }
+                ))
+                .disabled(!keeper.isActive)
+            }
             Toggle("Launch at login", isOn: Binding(
                 get: { LoginItem.isEnabled },
                 set: { LoginItem.setEnabled($0) }

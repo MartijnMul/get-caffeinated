@@ -30,12 +30,17 @@ IDENTITY="${SIGN_IDENTITY:-$(security find-identity -v -p codesigning \
     | sed -n 's/.*) \([0-9A-F]\{40\}\) "Developer ID Application: .*"/\1/p' \
     | head -n 1)}"
 
-./scripts/build-app.sh --universal
+SIGN_IDENTITY="${IDENTITY:--}" ./scripts/build-app.sh --universal
 
 if [ -n "$IDENTITY" ]; then
     echo "Signing with $IDENTITY"
-    # The hardened runtime and a secure timestamp are what notarisation asks
-    # for; the app needs no entitlements on top.
+    # build-app.sh signed already; this adds the secure timestamp that
+    # notarisation asks for, next to the hardened runtime. Neither the app
+    # nor its helper daemon needs entitlements on top. The helper goes first,
+    # because the app's signature seals it.
+    codesign --force --options runtime --timestamp --sign "$IDENTITY" \
+        --identifier io.github.martijnmul.getcaffeinated.helper \
+        "$APP/Contents/MacOS/GetCaffeinatedHelper"
     codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
 fi
 codesign --verify --strict "$APP"

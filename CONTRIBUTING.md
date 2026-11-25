@@ -55,6 +55,9 @@ new build.
 | `MenuOpening.swift` | Rebuilds the menu each time it opens, so times and states are fresh. |
 | `MenuBarIcon.swift` | The bean and cup icons, outline or filled to match the menu bar. |
 | `LoginItem.swift` | "Launch at login", through `SMAppService`. |
+| `LidAwakeClient.swift` | "Awake with lid closed": registers the helper daemon, asks for Touch ID, talks to it over XPC. |
+| `GetCaffeinatedHelper/main.swift` | The root helper daemon: sets `pmset disablesleep` for one app connection and always switches it back. |
+| `LidAwakeShared/LidAwakeService.swift` | The XPC protocol and names the app and the helper share. |
 
 Tests live in `Tests/GetCaffeinatedTests`, written with Swift Testing.
 

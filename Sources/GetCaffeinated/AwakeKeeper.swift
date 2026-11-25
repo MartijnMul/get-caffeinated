@@ -1,5 +1,6 @@
 import AppKit
 import IOKit.pwr_mgt
+import LidAwakeShared
 
 /// Keeps the Mac awake by holding a power-management assertion: like
 /// `caffeinate -d` when the screen stays on, like `caffeinate -i` when only
@@ -12,6 +13,9 @@ final class AwakeKeeper: ObservableObject {
     @Published private(set) var endsWhenUnplugged = false
     /// The session ends when the Mac leaves the network it started on.
     @Published private(set) var endsOnLeavingNetwork = false
+    /// Closing the lid does not put the Mac to sleep. Lasts for this session
+    /// only, and at most `LidAwake.maximumDuration`.
+    @Published private(set) var staysAwakeWithLidClosed = false
 
     /// Keep the display on as well, or only the system. Remembered between
     /// launches, and applied straight away to a running session.
@@ -32,6 +36,11 @@ final class AwakeKeeper: ObservableObject {
     private var startNetworks: Set<String> = []
     private var networkGraceTimer: Timer?
     private var wakeObserver: NSObjectProtocol?
+    private let lid = LidAwakeClient()
+    private var lidTimer: Timer?
+    /// Counts sessions, so a Touch ID prompt that outlived its session does
+    /// not apply to the next one.
+    private var session = 0
 
     init() {
         keepsScreenOn = UserDefaults.standard.object(forKey: Self.keepsScreenOnKey) as? Bool ?? true
@@ -55,6 +64,7 @@ final class AwakeKeeper: ObservableObject {
 
         PowerSource.observeChanges { [weak self] in self?.stopIfUnplugged() }
         NetworkSignature.observeChanges { [weak self] in self?.checkNetwork() }
+        lid.onLost = { [weak self] in self?.endLidClosed() }
     }
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
@@ -91,7 +101,29 @@ final class AwakeKeeper: ObservableObject {
         endsOnLeavingNetwork = true
     }
 
+    /// Lets the lid close without the Mac going to sleep, for the rest of
+    /// this session or `LidAwake.maximumDuration`, whichever ends first.
+    /// Asks for Touch ID or the password first. Needs a running session.
+    func setStaysAwakeWithLidClosed(_ enabled: Bool) async {
+        guard enabled else { return endLidClosed() }
+        guard isActive, !staysAwakeWithLidClosed else { return }
+
+        let cap = Date().addingTimeInterval(LidAwake.maximumDuration)
+        let end = min(activeUntil ?? cap, cap)
+        let askedIn = session
+        guard await lid.enable(until: end) else { return }
+        // The session may have ended or changed while Touch ID was up.
+        guard isActive, session == askedIn else { return lid.disable() }
+
+        staysAwakeWithLidClosed = true
+        lidTimer = Timer.scheduledTimer(withTimeInterval: end.timeIntervalSinceNow, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.endLidClosed() }
+        }
+    }
+
     func stop() {
+        session += 1
+        endLidClosed()
         timer?.invalidate()
         timer = nil
         networkGraceTimer?.invalidate()
@@ -126,6 +158,16 @@ final class AwakeKeeper: ObservableObject {
         assertionID = newID
         isActive = true
         return true
+    }
+
+    /// The daemon also ends it on its own at the deadline, or when the app
+    /// quits or crashes.
+    private func endLidClosed() {
+        lidTimer?.invalidate()
+        lidTimer = nil
+        guard staysAwakeWithLidClosed else { return }
+        staysAwakeWithLidClosed = false
+        lid.disable()
     }
 
     private func stopIfUnplugged() {

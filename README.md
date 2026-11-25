@@ -29,6 +29,27 @@ does not go to sleep, and neither does the system. Turn off "Keep screen on"
 to keep only the system awake and let the display sleep, like
 `caffeinate -i`, for downloads and builds.
 
+### Awake with the lid closed
+
+During a session, "Awake with lid closed" keeps a MacBook awake with the lid
+shut, also on battery and without an external display: handy for working
+through a phone hotspot on the road. `caffeinate` cannot do this; it takes
+the system setting `pmset disablesleep`, which needs administrator rights.
+
+- The first time, macOS asks you to allow Get Caffeinated's helper under
+  System Settings > General > Login Items > Allow in the Background. That
+  helper is the only part that runs as an administrator, and it only takes
+  requests from Get Caffeinated itself.
+- Each time you switch it on, the app asks for Touch ID or your password.
+- It switches off with the session, after at most 8 hours, and when the app
+  quits or crashes. A Mac that restarts while it is on gets it switched off
+  at startup.
+
+A Mac that cannot sleep in a closed bag gets warm and drains its battery,
+so keep it somewhere with air around it. The option needs a signed build:
+releases signed with a Developer ID have it, a build without that certificate does not
+show it.
+
 ## Requirements
 
 Developed and tested on the current macOS. The app is built to run on
@@ -64,7 +85,8 @@ Either way, turn on "Launch at login" from the copy in Applications.
 ### Uninstall
 
 Turn off "Launch at login", choose Quit Get Caffeinated, and drag the app
-from Applications to the Bin. If you ever switched "Keep screen on", that
+from Applications to the Bin. If you used "Awake with lid closed", turn the
+app off under Allow in the Background in Login Items first. If you ever switched "Keep screen on", that
 setting stays behind; to remove it too:
 
 ```sh

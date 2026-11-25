@@ -26,3 +26,4 @@ jobs:
           ./scripts/build-app.sh --universal
           codesign --verify --strict "build/Get Caffeinated.app"
           lipo -archs "build/Get Caffeinated.app/Contents/MacOS/GetCaffeinated"
+          lipo -archs "build/Get Caffeinated.app/Contents/MacOS/GetCaffeinatedHelper"
