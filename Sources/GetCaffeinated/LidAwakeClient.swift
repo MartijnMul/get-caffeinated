@@ -5,34 +5,56 @@ import ServiceManagement
 
 /// Talks to the helper daemon that keeps the Mac awake with the lid closed.
 /// The daemon is registered through `SMAppService` and approved once in System
-/// Settings > General > Login Items; after that, each session asks for Touch
-/// ID (or the password) before the lid may stay closed.
+/// Settings > General > Login Items; after that, each lid-closed session asks
+/// for Touch ID (or the password) first.
 @MainActor
 final class LidAwakeClient {
     /// Only a build signed with a certificate can use the daemon, because the
     /// daemon accepts connections from its own team only.
     static let isAvailable = LidAwake.ownTeamID != nil
 
-    /// Called when the daemon goes away while the lid is allowed closed; the
-    /// daemon turns the setting off when it restarts, so the app should too.
-    var onLost: (() -> Void)?
+    /// Called when the daemon ended it on its own (time up, low battery, too
+    /// hot) or went away; either way the setting is off again.
+    var onEnded: (() -> Void)?
 
     private let service = SMAppService.daemon(plistName: "\(LidAwake.helperLabel).plist")
     private var connection: NSXPCConnection?
 
-    /// Asks for approval and Touch ID where needed, then keeps the Mac awake
-    /// with the lid closed until `end`. Returns whether that is now the case.
-    func enable(until end: Date) async -> Bool {
+    /// Makes sure the daemon is approved, then asks for Touch ID or the
+    /// password. True when the user may go ahead.
+    func authorize() async -> Bool {
         guard ensureRegistered() else { return false }
-        guard await authenticate() else { return false }
-        let enabled = await call(seconds: end.timeIntervalSinceNow)
-        if !enabled {
-            alert(
-                "Could not keep the Mac awake with the lid closed",
-                "The helper did not respond. Try again, or turn Get Caffeinated off and on under Allow in the Background in Login Items."
+        activate()
+        let context = LAContext()
+        do {
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthentication,
+                localizedReason: "keep the Mac awake with the lid closed"
             )
+        } catch {
+            return false
         }
-        return enabled
+    }
+
+    /// Asks the daemon to keep the Mac awake with the lid closed for
+    /// `seconds`. Shows why when it refuses.
+    func enable(seconds: TimeInterval) async -> Bool {
+        let connection = currentConnection()
+        let refusal: String? = await withCheckedContinuation { continuation in
+            // XPC calls exactly one of the two: the error handler or the reply.
+            let proxy = connection.remoteObjectProxyWithErrorHandler { _ in
+                continuation.resume(returning: "The helper did not respond. Try again, or turn Get Caffeinated off and on under Allow in the Background in Login Items.")
+            } as? LidAwakeService
+            guard let proxy else { return continuation.resume(returning: "The helper could not be reached.") }
+            proxy.enable(seconds: seconds) { refusal in
+                continuation.resume(returning: refusal)
+            }
+        }
+        if let refusal {
+            alert("Could not keep the Mac awake with the lid closed", refusal)
+            return false
+        }
+        return true
     }
 
     func disable() {
@@ -60,37 +82,14 @@ final class LidAwakeClient {
         return false
     }
 
-    private func authenticate() async -> Bool {
-        activate()
-        let context = LAContext()
-        do {
-            return try await context.evaluatePolicy(
-                .deviceOwnerAuthentication,
-                localizedReason: "keep the Mac awake with the lid closed"
-            )
-        } catch {
-            return false
-        }
-    }
-
-    private func call(seconds: TimeInterval) async -> Bool {
-        let connection = currentConnection()
-        return await withCheckedContinuation { continuation in
-            // XPC calls exactly one of the two: the error handler or the reply.
-            let proxy = connection.remoteObjectProxyWithErrorHandler { _ in
-                continuation.resume(returning: false)
-            } as? LidAwakeService
-            guard let proxy else { return continuation.resume(returning: false) }
-            proxy.enable(seconds: seconds) { enabled in
-                continuation.resume(returning: enabled)
-            }
-        }
-    }
-
     private func currentConnection() -> NSXPCConnection {
         if let connection { return connection }
         let connection = NSXPCConnection(machServiceName: LidAwake.helperLabel, options: .privileged)
         connection.remoteObjectInterface = NSXPCInterface(with: LidAwakeService.self)
+        connection.exportedInterface = NSXPCInterface(with: LidAwakeEvents.self)
+        connection.exportedObject = EventReceiver { [weak self] in
+            Task { @MainActor in self?.onEnded?() }
+        }
         if let teamID = LidAwake.ownTeamID {
             connection.setCodeSigningRequirement(LidAwake.requirement(identifier: LidAwake.helperLabel, teamID: teamID))
         }
@@ -108,7 +107,8 @@ final class LidAwakeClient {
         let lostConnection = connection
         connection = nil
         lostConnection?.invalidate()
-        onLost?()
+        // A daemon that restarts switches the setting off at its start.
+        onEnded?()
     }
 
     /// A menu bar app is never the active app; bring it forward so its
@@ -133,5 +133,18 @@ final class LidAwakeClient {
             alert.addButton(withTitle: "Cancel")
         }
         return alert.runModal() == .alertFirstButtonReturn && button != nil
+    }
+}
+
+/// Receives the daemon's events on an XPC queue and passes them on.
+private final class EventReceiver: NSObject, LidAwakeEvents, Sendable {
+    private let ended: @Sendable () -> Void
+
+    init(ended: @escaping @Sendable () -> Void) {
+        self.ended = ended
+    }
+
+    func lidAwakeEnded(reason: String) {
+        ended()
     }
 }

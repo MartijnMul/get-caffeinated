@@ -31,9 +31,10 @@ to keep only the system awake and let the display sleep, like
 
 ### Awake with the lid closed
 
-During a session, "Awake with lid closed" keeps a MacBook awake with the lid
-shut, also on battery and without an external display: handy for working
-through a phone hotspot on the road. `caffeinate` cannot do this; it takes
+"Awake with lid closed" keeps a MacBook awake with the lid shut, also on
+battery and without an external display: handy for working through a phone
+hotspot on the road. It is a session of its own, for 15, 30, 45 or 60
+minutes, never longer. `caffeinate` cannot do this; it takes
 the system setting `pmset disablesleep`, which needs administrator rights.
 
 - The first time, macOS asks you to allow Get Caffeinated's helper under
@@ -41,9 +42,11 @@ the system setting `pmset disablesleep`, which needs administrator rights.
   helper is the only part that runs as an administrator, and it only takes
   requests from Get Caffeinated itself.
 - Each time you switch it on, the app asks for Touch ID or your password.
-- It switches off with the session, after at most 8 hours, and when the app
-  quits or crashes. A Mac that restarts while it is on gets it switched off
-  at startup.
+- It switches off when the time is up, when you choose Stop or another
+  session, and when the app quits or crashes. It also stops on a battery at
+  15% or lower, or when the Mac gets too hot. If the lid is closed by then,
+  the Mac goes to sleep right away. A Mac that restarts while it is on gets
+  it switched off at startup.
 
 A Mac that cannot sleep in a closed bag gets warm and drains its battery,
 so keep it somewhere with air around it. The option needs a signed build:

@@ -13,8 +13,8 @@ final class AwakeKeeper: ObservableObject {
     @Published private(set) var endsWhenUnplugged = false
     /// The session ends when the Mac leaves the network it started on.
     @Published private(set) var endsOnLeavingNetwork = false
-    /// Closing the lid does not put the Mac to sleep. Lasts for this session
-    /// only, and at most `LidAwake.maximumDuration`.
+    /// A lid-closed session: closing the lid does not put the Mac to sleep.
+    /// Always on a timer of at most `LidAwake.maximumDuration`.
     @Published private(set) var staysAwakeWithLidClosed = false
 
     /// Keep the display on as well, or only the system. Remembered between
@@ -37,9 +37,8 @@ final class AwakeKeeper: ObservableObject {
     private var networkGraceTimer: Timer?
     private var wakeObserver: NSObjectProtocol?
     private let lid = LidAwakeClient()
-    private var lidTimer: Timer?
-    /// Counts sessions, so a Touch ID prompt that outlived its session does
-    /// not apply to the next one.
+    /// Counts sessions, so a helper reply that outlived its session does not
+    /// apply to the next one.
     private var session = 0
 
     init() {
@@ -64,7 +63,11 @@ final class AwakeKeeper: ObservableObject {
 
         PowerSource.observeChanges { [weak self] in self?.stopIfUnplugged() }
         NetworkSignature.observeChanges { [weak self] in self?.checkNetwork() }
-        lid.onLost = { [weak self] in self?.endLidClosed() }
+        // The helper ended it on its own (time up, low battery, too hot) or
+        // went away: the lid-closed session is over.
+        lid.onEnded = { [weak self] in
+            if self?.staysAwakeWithLidClosed == true { self?.stop() }
+        }
     }
 
     /// Starts keeping the Mac awake. Pass `nil` to stay awake until stopped.
@@ -101,24 +104,26 @@ final class AwakeKeeper: ObservableObject {
         endsOnLeavingNetwork = true
     }
 
-    /// Lets the lid close without the Mac going to sleep, for the rest of
-    /// this session or `LidAwake.maximumDuration`, whichever ends first.
-    /// Asks for Touch ID or the password first. Needs a running session.
-    func setStaysAwakeWithLidClosed(_ enabled: Bool) async {
-        guard enabled else { return endLidClosed() }
-        guard isActive, !staysAwakeWithLidClosed else { return }
+    /// Starts a lid-closed session of `minutes`, at most
+    /// `LidAwake.maximumDuration`: the Mac stays awake with the lid shut, and
+    /// sleeps when the time is up. Asks for Touch ID or the password first;
+    /// cancelling it leaves a running session alone.
+    func startLidClosed(minutes: Int) async {
+        let duration = min(TimeInterval(minutes * 60), LidAwake.maximumDuration)
+        guard duration > 0, await lid.authorize() else { return }
 
-        let cap = Date().addingTimeInterval(LidAwake.maximumDuration)
-        let end = min(activeUntil ?? cap, cap)
-        let askedIn = session
-        guard await lid.enable(until: end) else { return }
-        // The session may have ended or changed while Touch ID was up.
-        guard isActive, session == askedIn else { return lid.disable() }
+        start(for: duration)
+        guard isActive, let end = activeUntil else { return }
+        let thisSession = session
+        let enabled = await lid.enable(seconds: end.timeIntervalSinceNow)
 
-        staysAwakeWithLidClosed = true
-        lidTimer = Timer.scheduledTimer(withTimeInterval: end.timeIntervalSinceNow, repeats: false) { [weak self] _ in
-            MainActor.assumeIsolated { self?.endLidClosed() }
+        // Another session may have started while the helper answered.
+        guard session == thisSession else {
+            if enabled { lid.disable() }
+            return
         }
+        guard enabled else { return stop() }
+        staysAwakeWithLidClosed = true
     }
 
     func stop() {
@@ -160,11 +165,9 @@ final class AwakeKeeper: ObservableObject {
         return true
     }
 
-    /// The daemon also ends it on its own at the deadline, or when the app
-    /// quits or crashes.
+    /// The helper also ends it on its own at its deadline, on a low battery
+    /// or a hot Mac, and when the app quits or crashes.
     private func endLidClosed() {
-        lidTimer?.invalidate()
-        lidTimer = nil
         guard staysAwakeWithLidClosed else { return }
         staysAwakeWithLidClosed = false
         lid.disable()

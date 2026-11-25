@@ -1,3 +1,4 @@
+import LidAwakeShared
 import SwiftUI
 
 @main
@@ -7,7 +8,9 @@ struct GetCaffeinatedApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            if let until = keeper.activeUntil {
+            if keeper.staysAwakeWithLidClosed, let until = keeper.activeUntil {
+                Text("Awake with lid closed until \(label(for: until))")
+            } else if let until = keeper.activeUntil {
                 Text("Awake until \(label(for: until))")
             } else if keeper.endsWhenUnplugged {
                 Text("Awake until unplugged")
@@ -41,15 +44,20 @@ struct GetCaffeinatedApp: App {
             Button("Until I leave") { keeper.startUntilLeavingNetwork() }
                 .disabled(NetworkSignature.current.isEmpty)
             Button("Indefinitely") { keeper.start(for: nil) }
+            if LidAwakeClient.isAvailable {
+                // A session of its own, never open-ended: the Mac will not
+                // sleep in a closed bag, so it always runs on a short timer.
+                Divider()
+                Menu("Awake with lid closed") {
+                    ForEach(LidAwake.menuMinutes, id: \.self) { minutes in
+                        Button("\(minutes) minutes") {
+                            Task { await keeper.startLidClosed(minutes: minutes) }
+                        }
+                    }
+                }
+            }
             Divider()
             Toggle("Keep screen on", isOn: $keeper.keepsScreenOn)
-            if LidAwakeClient.isAvailable {
-                Toggle("Awake with lid closed", isOn: Binding(
-                    get: { keeper.staysAwakeWithLidClosed },
-                    set: { enabled in Task { await keeper.setStaysAwakeWithLidClosed(enabled) } }
-                ))
-                .disabled(!keeper.isActive)
-            }
             Toggle("Launch at login", isOn: Binding(
                 get: { LoginItem.isEnabled },
                 set: { LoginItem.setEnabled($0) }
